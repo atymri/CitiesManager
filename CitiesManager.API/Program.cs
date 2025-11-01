@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using CitiesManager.Infrastructure.DatabaseContext;
+using CitiesManager.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +88,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+await AutoMigrationHelper.ApplyPendingMigrationsAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 app.UseHsts();

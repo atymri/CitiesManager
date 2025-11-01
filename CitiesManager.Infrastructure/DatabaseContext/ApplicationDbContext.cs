@@ -19,17 +19,12 @@ public class ApplicationDbContext : DbContext
             new City()
             {
                 CityID = Guid.Parse("23b46d49-25ec-4b04-be3a-ea73f5a3d5d1"),
-                CityName = "New York"
+                CityName = "Mumbai"
             },
             new City()
             {
                 CityID = Guid.Parse("d0c788c0-6f24-4084-974d-79ebdcf352b7"),
                 CityName = "London"
-            },
-            new City()
-            {
-                CityID = Guid.Parse("2e0e0e68-72e5-416b-a21b-ac97e25bee17"),
-                CityName = "Hamburg"
             },
             new City()
             {

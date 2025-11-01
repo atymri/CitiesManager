@@ -9,4 +9,6 @@ public class City
     [Required]
     [StringLength(25)]
     public string? CityName { get; set; }
+
+    public DateTime DateAdded { get; private set; } = DateTime.UtcNow;
 }
