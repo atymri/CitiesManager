@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CitiesManager.API</name>
+    </assembly>
+    <members>
+        <member name="T:CitiesManager.API.Controllers.v1.CitiesController">
+            <summary>
+            Controller for managing city entities.
+            </summary>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.#ctor(CitiesManager.Infrastructure.DatabaseContext.ApplicationDbContext)">
+            <summary>
+            Controller for managing city entities.
+            </summary>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.GetCities">
+            <summary>
+            Retrieves all cities from the database, ordered by city name.
+            </summary>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing a list of all <see cref="T:CitiesManager.Core.Entities.City"/> objects.
+            </returns>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.GetCity(System.Guid)">
+            <summary>
+            Retrieves a specific c ity by its unique identifier.
+            </summary>
+            <param name="cityId">The unique identifier of the city.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing the <see cref="T:CitiesManager.Core.Entities.City"/> object if found; otherwise, a Problem response with status 404.
+            </returns>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.PutCity(System.Guid,CitiesManager.Core.Entities.City)">
+            <summary>
+            Updates an existing city with new values.
+            </summary>
+            <param name="cityId">The unique identifier of the city to update.</param>
+            <param name="city">The <see cref="T:CitiesManager.Core.Entities.City"/> object containing updated values.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> indicating the result of the update operation:
+            <list type="bullet">
+            <item>204 No Content if successful.</item>
+            <item>400 Bad Request if the IDs do not match.</item>
+            <item>404 Not Found if the city does not exist.</item>
+            </list>
+            </returns>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.PostCity(CitiesManager.Core.Entities.City)">
+            <summary>
+            Creates a new city in the database.
+            </summary>
+            <param name="city">The <see cref="T:CitiesManager.Core.Entities.City"/> object to create.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing the created <see cref="T:CitiesManager.Core.Entities.City"/> object and a 201 Created response.
+            </returns>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.DeleteCity(System.Guid)">
+            <summary>
+            Deletes a city from the database by its unique identifier.
+            </summary>
+            <param name="cityId">The unique identifier of the city to delete.</param>
+            <returns>
+            An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> indicating the result of the delete operation:
+            <list type="bullet">
+            <item>204 No Content if successful.</item>
+            <item>404 Not Found if the city does not exist.</item>
+            </list>
+            </returns>
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v1.CitiesController.CityExists(System.Guid)">
+            <summary>
+            Checks if a city exists in the database by its unique identifier.
+            </summary>
+            <param name="cityId">The unique identifier of the city.</param>
+            <returns>
+            <c>true</c> if the city exists; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="T:CitiesManager.API.Controllers.v2.CitiesController">
+             <summary>
+             Controller for managing city entities.
+             </summary>
+            
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v2.CitiesController.#ctor(CitiesManager.Infrastructure.DatabaseContext.ApplicationDbContext)">
+             <summary>
+             Controller for managing city entities.
+             </summary>
+            
+        </member>
+        <member name="M:CitiesManager.API.Controllers.v2.CitiesController.GetCities">
+            <summary>
+            Retrieves all cities from the database, ordered by city name.
+            </summary>
+            <returns>
+            a list of all <see cref="T:CitiesManager.Core.Entities.City"/> name objects.
+            </returns>
+        </member>
+    </members>
+</doc>
