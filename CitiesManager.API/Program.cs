@@ -1,9 +1,21 @@
 using CitiesManager.API.Extensions;
 using CitiesManager.Infrastructure.Extensions;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.ConfigureServices();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File("/logs/logs.txt"
+        , outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+        , rollingInterval: RollingInterval.Day)
+    .WriteTo.Seq(serverUrl: "http://localhost:5341/", period: TimeSpan.FromSeconds(2))
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
@@ -12,13 +24,12 @@ await AutoMigrationHelper.ApplyPendingMigrationsAsync(app.Services);
 // Configure the HTTP request pipeline.
 app.UseHsts();
 app.UseHttpsRedirection();
-
 app.UseSwagger();
 app.UseSwaggerUI(o =>
 {
     o.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
     o.SwaggerEndpoint("/swagger/v2/swagger.json", "2.0");
-});
+}); 
 
 app.UseRouting();
 app.UseCors(); // if you don't add this you wouldn't be able to use CORS.
