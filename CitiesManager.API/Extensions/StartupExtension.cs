@@ -1,10 +1,15 @@
-﻿using Asp.Versioning;
+﻿using System.Text;
+using Asp.Versioning;
 using CitiesManager.Core.Identity;
+using CitiesManager.Core.ServiceContracts;
+using CitiesManager.Core.Services;
 using CitiesManager.Infrastructure.DatabaseContext;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace CitiesManager.API.Extensions
@@ -22,6 +27,9 @@ namespace CitiesManager.API.Extensions
 
             });
 
+            builder.Services.AddTransient<IJwtService, JwtService>();
+
+
             builder.Services.AddApiVersioning(config =>
             {
                 // Read API version from URL segment (e.g., /api/v1/cities)
@@ -37,12 +45,54 @@ namespace CitiesManager.API.Extensions
                 setup.SubstituteApiVersionInUrl = true;
             });
 
-            // Swagger setup
-            builder.Services.AddSwaggerGen(c =>
+            builder.Services.AddAuthentication(options =>
             {
-                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "api.xml"));
-                c.SwaggerDoc("v1", new OpenApiInfo() { Title = "Cities API v1", Version = "1.0" });
-                c.SwaggerDoc("v2", new OpenApiInfo() { Title = "Cities API v2", Version = "2.0" });
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
+                options.IncludeErrorDetails = true;
+            });
+
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "Cities Manager API", Version = "v1" });
+                options.SwaggerDoc("v2", new OpenApiInfo { Title = "Cities Manager API", Version = "v2" });
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT Token in this format: Bearer {your token}"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             });
 
             var connectionString = builder.Configuration.GetConnectionString("Default") ??

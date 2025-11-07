@@ -35,7 +35,6 @@ namespace CitiesManager.Core.Services
             };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-
             var signInCreds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var tokenGenerator = new JwtSecurityToken(issuer: issuer, 

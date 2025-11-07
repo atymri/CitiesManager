@@ -2,6 +2,7 @@
 using CitiesManager.API.Filters.ActionFilters;
 using CitiesManager.Core.DTOs.Identity;
 using CitiesManager.Core.Identity;
+using CitiesManager.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +17,17 @@ namespace CitiesManager.API.Controllers.v1
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<Role> _roleManager;
+        private readonly IJwtService _jwtService;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<Role> roleManager)
+        public AccountController(UserManager<User> userManager, 
+            SignInManager<User> signInManager, 
+            RoleManager<Role> roleManager,
+            IJwtService jwtService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
@@ -39,9 +45,10 @@ namespace CitiesManager.API.Controllers.v1
                     res.Errors.Select(e => e.Description)),
                         statusCode: StatusCodes.Status400BadRequest);
 
+            var authResponse = _jwtService.CreateJwtToken(user);
             await _signInManager.SignInAsync(user, false);
 
-            return Ok(new {FirstName = user.FirstName, LastName = user.LastName, Email = user.Email});
+            return Ok(authResponse);
 
         }
 
@@ -61,7 +68,9 @@ namespace CitiesManager.API.Controllers.v1
                 return Problem("Invalid email or password", 
                     statusCode: StatusCodes.Status400BadRequest);
 
-            return Ok(new { FirstName = user.FirstName, LastName = user.LastName, Email = user.Email });
+            var authResponse = _jwtService.CreateJwtToken(user);
+
+            return Ok(authResponse);
         }
 
         [HttpGet("logout")]
