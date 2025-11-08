@@ -1,11 +1,5 @@
-﻿using System.Text;
-using CitiesManager.API.Extensions;
-using CitiesManager.Core.ServiceContracts;
-using CitiesManager.Core.Services;
+﻿using CitiesManager.API.Extensions;
 using CitiesManager.Infrastructure.Extensions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

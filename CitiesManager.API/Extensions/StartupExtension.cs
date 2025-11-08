@@ -76,7 +76,7 @@ namespace CitiesManager.API.Extensions
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Enter JWT Token in this format: Bearer {your token}"
+                    Description = "Enter JWT Token in this format: {your token}"
                 });
 
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement

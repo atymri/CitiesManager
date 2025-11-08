@@ -22,20 +22,20 @@ namespace CitiesManager.Core.Services
             var issuer = _configuration["jwt:Issuer"]; // who makes the token?
             var audience = _configuration["jwt:Audience"]; // who uses the token?
             var expirationDate= DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["jwt:EXPIRATION_MINUTES"])); // when token expires?
-            var key = _configuration["jwt:key"]; // secret key used for encryption (has to be env variables but we are in development )
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["jwt:key"])); // secret key used for encryption (has to be env variables but we are in development )
 
             var claims = new Claim[]
             {
                 // the subject (sub), issued at (iat), jti (jwt unique id) are recommended claims and not optional.
 
                 new (JwtRegisteredClaimNames.Sub, user.Id.ToString()), // subject (user id)
-                new (JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()), // issued at (date and time of the token generated)
+                new (JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                    ClaimValueTypes.Integer64), // issued at (date and time of the token generated)
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT ID (unique identifier for the token)
                 new (ClaimTypes.NameIdentifier, user.Email) // unique name identifier of the user (Email) (optional)
             };
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            var signInCreds = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var signInCreds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var tokenGenerator = new JwtSecurityToken(issuer: issuer, 
                 audience: audience,
