@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using CitiesManager.Core.DTOs;
 using CitiesManager.Core.Identity;
@@ -45,7 +46,23 @@ namespace CitiesManager.Core.Services
 
             var token = new JwtSecurityTokenHandler().WriteToken(tokenGenerator);
 
-            return new AuthenticationResponse() {Email = user.Email, ExpireDate = expirationDate, Token = token};
+            return new AuthenticationResponse()
+            {
+                Email = user.Email, 
+                ExpireDate = expirationDate, 
+                Token = token,
+                RefreshToken = GenerateRefreshToken(),
+                RefreshTokenExpireDate = 
+                    DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["RefreshToken:EXPIRATION_MINUTES"]))
+            };
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var bytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes);
         }
     }
 }

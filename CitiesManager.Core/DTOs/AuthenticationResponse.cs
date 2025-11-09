@@ -10,6 +10,8 @@ namespace CitiesManager.Core.DTOs
     {
         public string? Email { get; set; } = string.Empty;
         public string? Token { get; set; } = string.Empty;
+        public string? RefreshToken { get; set; } = string.Empty;
+        public DateTime RefreshTokenExpireDate { get; set; }
         public DateTime ExpireDate { get; set; }
 
     }

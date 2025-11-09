@@ -46,6 +46,10 @@ namespace CitiesManager.API.Controllers.v1
                         statusCode: StatusCodes.Status400BadRequest);
 
             var authResponse = _jwtService.CreateJwtToken(user);
+            user.RefreshToken = authResponse.RefreshToken;
+            user.RefreshTokenExpiration = authResponse.RefreshTokenExpireDate;
+            await _userManager.UpdateAsync(user);
+
             await _signInManager.SignInAsync(user, false);
 
             return Ok(authResponse);
@@ -69,6 +73,9 @@ namespace CitiesManager.API.Controllers.v1
                     statusCode: StatusCodes.Status400BadRequest);
 
             var authResponse = _jwtService.CreateJwtToken(user);
+            user.RefreshToken = authResponse.RefreshToken;
+            user.RefreshTokenExpiration = authResponse.RefreshTokenExpireDate;
+            await _userManager.UpdateAsync(user);
 
             return Ok(authResponse);
         }
