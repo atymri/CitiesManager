@@ -33,7 +33,8 @@ namespace CitiesManager.Core.Services
                 new (JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
                     ClaimValueTypes.Integer64), // issued at (date and time of the token generated)
                 new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JWT ID (unique identifier for the token)
-                new (ClaimTypes.NameIdentifier, user.Email) // unique name identifier of the user (Email) (optional)
+                new (ClaimTypes.NameIdentifier, user.Email),
+                new (ClaimTypes.Email, user.Email)// unique name identifier of the user (Email) (optional)
             };
 
             var signInCreds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -55,6 +56,30 @@ namespace CitiesManager.Core.Services
                 RefreshTokenExpireDate = 
                     DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["RefreshToken:EXPIRATION_MINUTES"]))
             };
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromAccessToken(string? token)
+        {
+            var tokenValidator = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidAudience = _configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                ValidateLifetime = false // important, its false because its being called with an expired token.
+            };
+
+            var principal=
+                new JwtSecurityTokenHandler().ValidateToken(token, tokenValidator, out SecurityToken securityToken);
+
+            if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
+                throw new SecurityTokenException("Invalid token");
+        
+            return principal;
+
         }
 
         private string GenerateRefreshToken()

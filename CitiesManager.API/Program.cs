@@ -22,18 +22,25 @@ var app = builder.Build();
 
 await AutoMigrationHelper.ApplyPendingMigrationsAsync(app.Services);
 
-app.UseHsts();
-app.UseHttpsRedirection();
-app.UseSwagger();
-app.UseSwaggerUI(o =>
+if (!app.Environment.IsDevelopment())
 {
-    o.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
-    o.SwaggerEndpoint("/swagger/v2/swagger.json", "2.0");
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
+else
+{
 
-    o.OAuthClientId("swagger-ui");
-    o.OAuthAppName("Cities Manager API - Swagger");
-    o.OAuthUsePkce();
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(o =>
+    {
+        o.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
+        o.SwaggerEndpoint("/swagger/v2/swagger.json", "2.0");
+
+        o.OAuthClientId("swagger-ui");
+        o.OAuthAppName("Cities Manager API - Swagger");
+        o.OAuthUsePkce();
+    });
+}
 
 app.UseRouting();
 app.UseCors();

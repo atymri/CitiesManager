@@ -1,5 +1,7 @@
-﻿using Asp.Versioning;
+﻿using System.Security.Claims;
+using Asp.Versioning;
 using CitiesManager.API.Filters.ActionFilters;
+using CitiesManager.Core.DTOs;
 using CitiesManager.Core.DTOs.Identity;
 using CitiesManager.Core.Identity;
 using CitiesManager.Core.ServiceContracts;
@@ -37,18 +39,15 @@ namespace CitiesManager.API.Controllers.v1
                 return ValidationProblem();
 
             var user = request.ToUser(HttpContext.Connection.RemoteIpAddress?.ToString());
-
+            var authResponse = _jwtService.CreateJwtToken(user);
+            user.RefreshToken = authResponse.RefreshToken;
+            user.RefreshTokenExpiration = authResponse.RefreshTokenExpireDate;
             var res = await _userManager.CreateAsync(user, request.Password);
 
             if (!res.Succeeded)
                 return Problem(string.Join(',',
                     res.Errors.Select(e => e.Description)),
                         statusCode: StatusCodes.Status400BadRequest);
-
-            var authResponse = _jwtService.CreateJwtToken(user);
-            user.RefreshToken = authResponse.RefreshToken;
-            user.RefreshTokenExpiration = authResponse.RefreshTokenExpireDate;
-            await _userManager.UpdateAsync(user);
 
             await _signInManager.SignInAsync(user, false);
 
@@ -63,19 +62,21 @@ namespace CitiesManager.API.Controllers.v1
                 return ValidationProblem();
 
             var user = await _userManager.FindByEmailAsync(request.Email);
+            
             if (user == null)
                 return Problem("User was not found", 
-                    statusCode: StatusCodes.Status400BadRequest);
-
-            var res = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, true);
-            if (!res.Succeeded)
-                return Problem("Invalid email or password", 
                     statusCode: StatusCodes.Status400BadRequest);
 
             var authResponse = _jwtService.CreateJwtToken(user);
             user.RefreshToken = authResponse.RefreshToken;
             user.RefreshTokenExpiration = authResponse.RefreshTokenExpireDate;
             await _userManager.UpdateAsync(user);
+
+
+            var res = await _signInManager.PasswordSignInAsync(request.Email, request.Password, false, true);
+            if (!res.Succeeded)
+                return Problem("Invalid email or password", 
+                    statusCode: StatusCodes.Status400BadRequest);
 
             return Ok(authResponse);
         }
@@ -132,6 +133,29 @@ namespace CitiesManager.API.Controllers.v1
             return NoContent();
         }
 
+        [HttpPost("generate-new-access-token")]
+        public async Task<IActionResult> GenerateNewAccessToken(RefreshTokenRequest request)
+        {
+            if (request == null)
+                return Problem("Invalid client request", statusCode: StatusCodes.Status400BadRequest);
+
+            var claims = _jwtService.GetPrincipalFromAccessToken(request.Token);
+            if (claims == null)
+                return Problem("Invalid jwt access token", statusCode: StatusCodes.Status400BadRequest);
+
+            var email = claims.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            
+            if(user == null || user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiration <= DateTime.UtcNow)
+                return Problem("Invalid refresh token", statusCode: StatusCodes.Status400BadRequest);
+
+            var authRes = _jwtService.CreateJwtToken(user);
+            user.RefreshTokenExpiration = authRes.RefreshTokenExpireDate;
+            user.RefreshToken = authRes.RefreshToken;
+            await _userManager.UpdateAsync(user);
+
+            return Ok(authRes);
+        }
 
         [HttpGet("register-email-check")]
         [TypeFilter(typeof(AjaxOnlyActionFilter))]

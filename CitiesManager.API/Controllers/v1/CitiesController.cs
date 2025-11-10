@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Asp.Versioning;
 using CitiesManager.Core.Entities;
 using CitiesManager.Infrastructure.DatabaseContext;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 
@@ -13,7 +14,7 @@ namespace CitiesManager.API.Controllers.v1;
 /// </summary>
 [ApiVersion("1.0")] // we have enabled UrlSegmentApiVersionReader from Program.cs
 //[EnableCors("4100Client")]
-[Authorize]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class CitiesController(ApplicationDbContext context) : BaseController
 {
     private readonly ApplicationDbContext _context = context ?? throw new NotImplementedException(nameof(context));
